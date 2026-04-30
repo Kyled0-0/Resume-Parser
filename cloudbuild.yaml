@@ -1,0 +1,56 @@
+# Cloud Build pipeline triggered by push to GitHub main branch.
+# Substitutions to set on the Cloud Build trigger (Console → Cloud Build → Triggers):
+#   _REGION       — e.g. australia-southeast1
+#   _REPO         — e.g. resume-parser-repo (Artifact Registry repo name)
+#   _CLUSTER      — e.g. resume-parser-cluster (GKE cluster name)
+#   _IMAGE_NAME   — e.g. resume-parser
+#
+# The trigger uses ${PROJECT_ID} and ${SHORT_SHA} automatically.
+
+substitutions:
+  _REGION: australia-southeast1
+  _REPO: resume-parser-repo
+  _CLUSTER: resume-parser-cluster
+  _IMAGE_NAME: resume-parser
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  # 1. Build the image, tagging with both the commit SHA and "v1" for stability.
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --tag=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:${SHORT_SHA}
+      - --tag=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:v1
+      - .
+
+  # 2. Push both tags to Artifact Registry.
+  - id: push-sha
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:${SHORT_SHA}
+
+  - id: push-v1
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:v1
+
+  # 3. Update the running Deployment to the new SHA-tagged image.
+  # If the GKE deploy permission isn't granted, this step fails but the build
+  # and push above still demonstrate the pipeline. Capture the log if it fails.
+  - id: deploy
+    name: gcr.io/cloud-builders/gke-deploy
+    args:
+      - run
+      - --filename=k8s/
+      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:${SHORT_SHA}
+      - --location=${_REGION}
+      - --cluster=${_CLUSTER}
+
+images:
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:${SHORT_SHA}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:v1

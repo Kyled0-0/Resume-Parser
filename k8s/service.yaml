@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: resume-parser-service
+  labels:
+    app: resume-parser
+    component: api
+    managed-by: capstone
+spec:
+  type: LoadBalancer
+  selector:
+    app: resume-parser
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+      protocol: TCP
