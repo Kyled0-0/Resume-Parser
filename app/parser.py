@@ -3,7 +3,7 @@ import io
 import json
 import logging
 
-import anthropic
+import google.generativeai as genai
 import pypdf
 import pypdf.errors
 
@@ -18,7 +18,7 @@ If a field is not present in the resume, return null (or empty list for arrays).
 Normalise dates to ISO format YYYY-MM. Use null for "Present" or "Current".
 """.strip()
 
-# JSON schema passed to Claude so it knows what fields to extract
+# JSON schema passed to Gemini so it knows what fields to extract
 RESUME_JSON_SCHEMA = """
 {
   "name": "string or null",
@@ -51,13 +51,13 @@ RESUME_JSON_SCHEMA = """
 
 async def parse_resume(
     pdf_bytes: bytes,
-    client: anthropic.AsyncAnthropic,
+    model: genai.GenerativeModel,
 ) -> ParsedResume:
-    """Extract structured data from a resume PDF using Claude."""
+    """Extract structured data from a resume PDF using Gemini."""
     text = await asyncio.to_thread(_extract_text, pdf_bytes)
     if not text:
         raise ValueError("PDF contains no extractable text")
-    return await _call_claude(text, client)
+    return await _call_gemini(text, model)
 
 
 def _extract_text(pdf_bytes: bytes) -> str:
@@ -70,25 +70,27 @@ def _extract_text(pdf_bytes: bytes) -> str:
         raise
 
 
-async def _call_claude(text: str, client: anthropic.AsyncAnthropic) -> ParsedResume:
-    user_message = (
-        f"Extract the resume data from the following text.\n\n"
+async def _call_gemini(text: str, model: genai.GenerativeModel) -> ParsedResume:
+    prompt = (
+        f"{PARSE_SYSTEM_PROMPT}\n\n"
         f"Schema:\n{RESUME_JSON_SCHEMA}\n\n"
         f"Resume text:\n{text}"
     )
 
-    response = await client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=2048,
-        system=PARSE_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_message}],
-    )
+    response = await model.generate_content_async(prompt)
 
-    raw = response.content[0].text
+    raw = response.text
+    # Strip markdown code fences if Gemini wraps the JSON
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
+
     try:
         data = json.loads(raw)
     except json.JSONDecodeError as e:
-        logger.error("claude_response_not_json", extra={"error_type": type(e).__name__})
-        raise ValueError("Claude returned non-JSON response") from e
+        logger.error("gemini_response_not_json", extra={"error_type": type(e).__name__})
+        raise ValueError("Gemini returned non-JSON response") from e
 
     return ParsedResume.model_validate(data)
