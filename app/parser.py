@@ -58,7 +58,6 @@ async def parse_resume(
 
 
 def _extract_text(pdf_bytes: bytes) -> str:
-    """Extract plain text from PDF bytes using pypdf."""
     try:
         reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
         pages = [page.extract_text() or "" for page in reader.pages]
@@ -69,7 +68,6 @@ def _extract_text(pdf_bytes: bytes) -> str:
 
 
 async def _call_claude(text: str, client: anthropic.Anthropic) -> ParsedResume:
-    """Send extracted text to Claude and parse the structured response."""
     user_message = (
         f"Extract the resume data from the following text.\n\n"
         f"Schema:\n{RESUME_JSON_SCHEMA}\n\n"
