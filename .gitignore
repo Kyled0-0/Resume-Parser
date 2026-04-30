@@ -2,6 +2,9 @@
 CLAUDE.md
 docs/
 
+# Git worktrees
+.worktrees/
+
 # Python
 .venv/
 __pycache__/
