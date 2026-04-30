@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: resume-parser
-          image: PLACEHOLDER_IMAGE
+          image: kyled0307/resume-parser:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
