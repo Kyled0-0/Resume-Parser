@@ -41,22 +41,42 @@ The same pod also serves a static single-page UI from `/` for browser-based demo
 
 ## Local Development
 
-Requires Python 3.12 and a Gemini API key (`aistudio.google.com` → API Keys, free tier available).
+Requires Python 3.12+ and a Gemini API key from [`aistudio.google.com/app/apikey`](https://aistudio.google.com/app/apikey) (free tier).
+
+**1. Clone and set up the environment**
+
+Windows (PowerShell):
+```powershell
+git clone https://github.com/Kyled0-0/Resume-Parser.git
+cd Resume-Parser
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.example .env
+notepad .env    # set GEMINI_API_KEY=...
+```
+
+macOS / Linux:
+```bash
+git clone https://github.com/Kyled0-0/Resume-Parser.git
+cd Resume-Parser
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+$EDITOR .env    # set GEMINI_API_KEY=...
+```
+
+**2. Run the server**
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate          # macOS/Linux
-# .venv\Scripts\Activate.ps1       # Windows PowerShell
-
-pip install -r requirements.txt
-
-cp .env.example .env
-# Edit .env, set GEMINI_API_KEY=...
-
 uvicorn app.main:app --reload --port 8000
 ```
 
-Open `http://localhost:8000/` for the browser UI, or `http://localhost:8000/docs` for the OpenAPI Swagger UI.
+**3. Open in a browser**
+
+- `http://localhost:8000/` — drop-in resume parser UI
+- `http://localhost:8000/docs` — OpenAPI Swagger UI
 
 ## Run via Docker
 
@@ -64,6 +84,8 @@ Open `http://localhost:8000/` for the browser UI, or `http://localhost:8000/docs
 docker build -t resume-parser:local .
 docker run -p 8000:8000 --env-file .env resume-parser:local
 ```
+
+The image is multi-stage, runs as a non-root user (`uid=1000`), and includes a `HEALTHCHECK` that hits `/health` every 30s.
 
 ## Deployment
 
@@ -96,6 +118,7 @@ See [`DEPLOY.md`](DEPLOY.md) for the full GCP Console steps:
 ├── cloudbuild.yaml         # CI/CD pipeline
 ├── requirements.txt
 ├── .env.example
+├── DEPLOY.md               # GCP Console deployment walkthrough
 └── README.md
 ```
 
