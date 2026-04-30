@@ -1,3 +1,4 @@
+import asyncio
 import io
 import json
 import logging
@@ -50,10 +51,12 @@ RESUME_JSON_SCHEMA = """
 
 async def parse_resume(
     pdf_bytes: bytes,
-    client: anthropic.Anthropic,
+    client: anthropic.AsyncAnthropic,
 ) -> ParsedResume:
     """Extract structured data from a resume PDF using Claude."""
-    text = _extract_text(pdf_bytes)
+    text = await asyncio.to_thread(_extract_text, pdf_bytes)
+    if not text:
+        raise ValueError("PDF contains no extractable text")
     return await _call_claude(text, client)
 
 
@@ -67,14 +70,14 @@ def _extract_text(pdf_bytes: bytes) -> str:
         raise
 
 
-async def _call_claude(text: str, client: anthropic.Anthropic) -> ParsedResume:
+async def _call_claude(text: str, client: anthropic.AsyncAnthropic) -> ParsedResume:
     user_message = (
         f"Extract the resume data from the following text.\n\n"
         f"Schema:\n{RESUME_JSON_SCHEMA}\n\n"
         f"Resume text:\n{text}"
     )
 
-    response = client.messages.create(
+    response = await client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=2048,
         system=PARSE_SYSTEM_PROMPT,

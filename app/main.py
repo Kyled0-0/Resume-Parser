@@ -1,12 +1,29 @@
 import logging
 
 import anthropic
+import anthropic.errors
+import pydantic
+import pypdf.errors
 from fastapi import Depends, FastAPI, HTTPException, UploadFile
+from pythonjsonlogger import jsonlogger
 
 from app.config import settings
 from app.dependencies import get_anthropic_client
 from app.parser import parse_resume
 from app.schemas import ErrorResponse, HealthResponse, ParsedResume
+
+
+def _configure_logging() -> None:
+    handler = logging.StreamHandler()
+    handler.setFormatter(jsonlogger.JsonFormatter(
+        "%(asctime)s %(name)s %(levelname)s %(message)s"
+    ))
+    root = logging.getLogger()
+    root.addHandler(handler)
+    root.setLevel(settings.log_level)
+
+
+_configure_logging()
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +42,15 @@ async def health() -> HealthResponse:
 @app.post(
     "/parse",
     response_model=ParsedResume,
-    responses={413: {"model": ErrorResponse}, 422: {"model": ErrorResponse}, 502: {"model": ErrorResponse}},
+    responses={
+        413: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+        502: {"model": ErrorResponse},
+    },
 )
 async def parse(
     file: UploadFile,
-    client: anthropic.Anthropic = Depends(get_anthropic_client),
+    client: anthropic.AsyncAnthropic = Depends(get_anthropic_client),
 ) -> ParsedResume:
     """Parse a resume PDF and return structured JSON."""
     pdf_bytes = await file.read()
@@ -39,9 +60,18 @@ async def parse(
 
     try:
         return await parse_resume(pdf_bytes, client)
-    except ValueError as e:
-        logger.error("parse_failed", extra={"error_type": type(e).__name__})
+    except pypdf.errors.PdfReadError as e:
+        logger.error("pdf_read_error", extra={"error_type": type(e).__name__})
+        raise HTTPException(status_code=422, detail="Could not read PDF") from e
+    except pydantic.ValidationError as e:
+        logger.error("response_validation_error", extra={"error_type": type(e).__name__})
+        raise HTTPException(status_code=502, detail="Upstream parsing service returned invalid data") from e
+    except anthropic.APIStatusError as e:
+        logger.error("anthropic_api_error", extra={"error_type": type(e).__name__, "status_code": e.status_code})
         raise HTTPException(status_code=502, detail="Upstream parsing service failed") from e
+    except ValueError as e:
+        logger.error("parse_value_error", extra={"error_type": type(e).__name__})
+        raise HTTPException(status_code=422, detail=str(e)) from e
     except Exception as e:
-        logger.error("parse_unexpected_error", extra={"error_type": type(e).__name__})
+        logger.exception("parse_unexpected_error", extra={"error_type": type(e).__name__})
         raise HTTPException(status_code=500, detail="Internal server error") from e
