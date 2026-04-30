@@ -9,4 +9,7 @@ from app.config import settings
 def get_gemini_model() -> genai.GenerativeModel:
     """Return a shared Gemini generative model."""
     genai.configure(api_key=settings.gemini_api_key)
-    return genai.GenerativeModel("models/gemini-2.0-flash-lite")
+    return genai.GenerativeModel(
+        "models/gemini-2.0-flash-lite",
+        generation_config={"response_mime_type": "application/json"},
+    )

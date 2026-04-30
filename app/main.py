@@ -67,7 +67,14 @@ async def parse(
         logger.error("response_validation_error", extra={"error_type": type(e).__name__})
         raise HTTPException(status_code=502, detail="Upstream parsing service returned invalid data") from e
     except GoogleAPICallError as e:
-        logger.error("gemini_api_error", extra={"error_type": type(e).__name__})
+        logger.error(
+            "gemini_api_error",
+            extra={
+                "error_type": type(e).__name__,
+                "error_code": getattr(e, "code", None),
+                "error_details": str(getattr(e, "details", "")),
+            },
+        )
         raise HTTPException(status_code=502, detail="Upstream parsing service failed") from e
     except ValueError as e:
         logger.error("parse_value_error", extra={"error_type": type(e).__name__})

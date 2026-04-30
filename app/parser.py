@@ -79,13 +79,21 @@ async def _call_gemini(text: str, model: genai.GenerativeModel) -> ParsedResume:
 
     response = await model.generate_content_async(prompt)
 
-    raw = response.text
-    # Strip markdown code fences if Gemini wraps the JSON
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.strip()
+    candidates = getattr(response, "candidates", None) or []
+    if not candidates:
+        logger.error("gemini_empty_response")
+        raise ValueError("Gemini returned empty response")
+
+    finish_reason = getattr(candidates[0], "finish_reason", None)
+    if finish_reason and str(finish_reason) not in {"STOP", "FinishReason.STOP", "1"}:
+        logger.error("gemini_blocked", extra={"finish_reason": str(finish_reason)})
+        raise ValueError(f"Gemini response not usable: {finish_reason}")
+
+    try:
+        raw = response.text
+    except ValueError as e:
+        logger.error("gemini_text_unavailable", extra={"error_type": type(e).__name__})
+        raise
 
     try:
         data = json.loads(raw)
