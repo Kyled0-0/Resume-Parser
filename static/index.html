@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resume Parser</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <style>/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("76d040d1-72c6-49b3-a64d-8849898e9d27") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("1e88192e-1be1-43d5-bd4a-78bfd2030df3") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("3d0ad417-6979-4f42-83e8-264ef58987cf") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("858cb3c9-d0f3-4d93-9bb2-0dcf6f41ba12") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("d29218ac-2f8a-4043-8ce3-5f7025675edb") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("e4e1641f-0210-45d9-af51-fee59e9f1f54") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("df191826-6c30-4ddc-bed2-ef6d020e12b9") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("9dd32778-ecf1-49ff-b6e9-844c5a0ae961") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("469db26e-8513-44ca-8556-dad8b14bcafc") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("aa394739-ac83-48bb-a8e8-2c9ddfa32362") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("b6976768-597a-4873-af51-fc0c413b3f7c") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("7875a1b5-1754-4a82-b334-84eb1f7798ac") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("e4422f30-975c-435c-98cf-f6e4e1d42306") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("2364778b-364e-42de-922f-2565ae38de33") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("e4484199-1551-4701-bd5b-3957f9818ec8") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("7e924fd2-6207-4cbf-a8f6-c6a702970292") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("d368ac34-795d-4de1-95ef-6545d0563d0e") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("f566175a-54fb-459b-9134-afdd3c479d82") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("425551be-4b5c-43fe-91da-051353d8a066") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("b1777557-e59b-4a3c-bb66-46228e022da5") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("a6ad611a-19fe-4537-a89b-dbc1e75e885b") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("9ba37d7b-d70c-4224-8363-cc2c3d449fdd") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("05355f3e-7f04-4d10-9be0-85df5100891a") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("c23ce8b6-4320-4019-95c6-b47035511c4f") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("c2c6554f-0125-492b-aafc-44436b4d3375") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("be8e96d5-35f4-4a40-865b-698029a61ad8") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("17f84028-3ba8-4007-b445-0afa761c93bf") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("70c8d1af-330d-4740-bd0e-95f165cf11f7") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --card: #ffffff;
+      --border: #e8e8ec;
+      --border-strong: #d6d6dc;
+      --text: #14161a;
+      --text-2: #4b4f57;
+      --text-3: #8b909a;
+      --accent: oklch(0.6 0.15 245);
+      --accent-soft: oklch(0.6 0.15 245 / 0.08);
+      --accent-strong: oklch(0.52 0.16 245);
+      --err: oklch(0.55 0.18 25);
+      --err-soft: oklch(0.55 0.18 25 / 0.08);
+      --err-border: oklch(0.55 0.18 25 / 0.25);
+      --shadow-sm: 0 1px 2px rgba(20, 22, 26, 0.04);
+      --shadow: 0 1px 3px rgba(20, 22, 26, 0.05), 0 4px 14px rgba(20, 22, 26, 0.04);
+      --shadow-lg: 0 10px 40px rgba(20, 22, 26, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+    .header p {
+      color: var(--text-2);
+      margin: 0;
+      font-size: 15.5px;
+    }
+
+    /* Compact "Parse another" bar shown after a result loads */
+    .topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .topbar.is-visible { display: flex; }
+    .topbar-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .topbar-file {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .topbar-name {
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .topbar-sub {
+      font-size: 12.5px;
+      color: var(--text-3);
+    }
+    .pdf-thumb {
+      width: 32px;
+      height: 36px;
+      border-radius: 4px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      display: grid;
+      place-items: center;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+
+    /* ── Dropzone ─────────────────────────────── */
+    .dropzone {
+      background: var(--card);
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--radius);
+      padding: 56px 32px;
+      text-align: center;
+      transition: all 160ms ease;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    .dropzone:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .dropzone.is-drag {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: scale(1.005);
+    }
+    .dz-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+    }
+    .dz-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 0 0 6px;
+    }
+    .dz-sub {
+      color: var(--text-2);
+      margin: 0 0 22px;
+      font-size: 14.5px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 120ms ease;
+      background: var(--card);
+      color: var(--text);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      box-shadow: 0 1px 2px rgba(20,22,26,0.06);
+    }
+    .btn-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+    .btn-secondary {
+      border-color: var(--border-strong);
+      color: var(--text-2);
+    }
+    .btn-secondary:hover { color: var(--text); border-color: var(--text-3); background: var(--card); }
+    .btn-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+
+    .dz-hint {
+      margin-top: 14px;
+      font-size: 12.5px;
+      color: var(--text-3);
+    }
+
+    /* ── Uploading state ──────────────────────── */
+    .upload-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .upload-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .upload-name {
+      font-weight: 600;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .upload-status {
+      font-size: 13px;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress {
+      height: 6px;
+      background: #f0f0f3;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0;
+      transition: width 220ms ease;
+      border-radius: 3px;
+    }
+    .progress-fill.indeterminate {
+      width: 32% !important;
+      animation: slide 1.3s ease-in-out infinite;
+    }
+    @keyframes slide {
+      0%   { transform: translateX(-110%); }
+      100% { transform: translateX(420%); }
+    }
+    .spinner {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid #e3e3e8;
+      border-top-color: var(--accent);
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error banner ─────────────────────────── */
+    .error {
+      background: var(--err-soft);
+      border: 1px solid var(--err-border);
+      color: var(--err);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .error-icon {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--err);
+      color: white;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .error-title { font-weight: 600; color: var(--text); margin-bottom: 2px; font-size: 15px; }
+    .error-msg { color: var(--text-2); font-size: 14px; }
+    .error-actions { margin-top: 12px; }
+
+    /* ── Result cards ─────────────────────────── */
+    .result {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 28px;
+    }
+    .card-title {
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin: 0 0 18px;
+    }
+
+    /* Identity card */
+    .identity .name {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin: 0 0 4px;
+    }
+    .identity .role-hint {
+      color: var(--text-2);
+      font-size: 14px;
+      margin: 0 0 18px;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 24px;
+    }
+    .contact-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      min-width: 0;
+    }
+    .contact-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .contact-text { min-width: 0; }
+    .contact-label {
+      font-size: 11.5px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+    .contact-value {
+      font-size: 14.5px;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    /* Summary */
+    .summary p {
+      margin: 0;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.65;
+      max-width: 62ch;
+    }
+
+    /* Timeline (work experience) */
+    .timeline {
+      position: relative;
+      padding-left: 20px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--border);
+      border-radius: 1px;
+    }
+    .tl-item {
+      position: relative;
+      padding-bottom: 22px;
+    }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item::before {
+      content: "";
+      position: absolute;
+      left: -19px;
+      top: 6px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--accent);
+    }
+    .tl-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 12px;
+      margin-bottom: 4px;
+    }
+    .tl-role { font-weight: 600; font-size: 16px; }
+    .tl-co { color: var(--text-2); font-size: 14.5px; }
+    .tl-dates {
+      margin-left: auto;
+      font-size: 12.5px;
+      color: var(--text-3);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .tl-desc {
+      color: var(--text-2);
+      font-size: 14px;
+      margin: 4px 0 0;
+      line-height: 1.6;
+    }
+
+    /* Education */
+    .edu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .edu-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: baseline;
+    }
+    .edu-school { font-weight: 600; font-size: 15.5px; }
+    .edu-degree { color: var(--text-2); font-size: 14px; margin-top: 2px; }
+    .edu-dates {
+      font-size: 12.5px;
+      color: var(--text-3);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* Skills */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* ── Animations ───────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 280ms ease both; }
+    .fade-up-1 { animation-delay: 40ms; }
+    .fade-up-2 { animation-delay: 90ms; }
+    .fade-up-3 { animation-delay: 140ms; }
+    .fade-up-4 { animation-delay: 190ms; }
+    .fade-up-5 { animation-delay: 240ms; }
+
+    .hidden { display: none !important; }
+
+    /* ── Responsive ───────────────────────────── */
+    @media (max-width: 600px) {
+      .page { padding: 32px 16px 56px; }
+      .header h1 { font-size: 24px; }
+      .card { padding: 22px; }
+      .contact-grid { grid-template-columns: 1fr; gap: 12px; }
+      .dropzone { padding: 40px 20px; }
+      .tl-dates { margin-left: 0; width: 100%; }
+      .edu-row { grid-template-columns: 1fr; }
+      .edu-dates { order: -1; }
+      .identity .name { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header" id="header">
+      <h1>Resume Parser</h1>
+      <p>Drop a resume PDF to extract its data.</p>
+    </header>
+
+    <!-- Compact bar after result loaded -->
+    <div class="topbar" id="topbar">
+      <div class="topbar-info">
+        <div class="pdf-thumb">PDF</div>
+        <div class="topbar-file">
+          <span class="topbar-name" id="topbar-name">resume.pdf</span>
+          <span class="topbar-sub" id="topbar-sub">Parsed successfully</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-secondary btn-sm" id="download-json">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M12 16l-4-4M12 16l4-4"></path><path d="M4 20h16"></path></svg>
+          Download JSON
+        </button>
+        <button class="btn btn-secondary btn-sm" id="parse-another">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Parse another
+        </button>
+      </div>
+    </div>
+
+    <!-- States are toggled here -->
+    <div id="state-idle">
+      <div class="dropzone" id="dropzone">
+        <div class="dz-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <h2 class="dz-title">Drop a resume PDF to extract its data.</h2>
+        <p class="dz-sub">Drag a file here, or click below to choose one.</p>
+        <button class="btn btn-primary" id="choose-btn" type="button">Choose PDF</button>
+        <div class="dz-hint">PDF only · up to 10 MB</div>
+        <input type="file" id="file-input" accept="application/pdf" hidden="">
+      </div>
+    </div>
+
+    <div id="state-uploading" class="hidden">
+      <div class="upload-card">
+        <div class="upload-head">
+          <div class="pdf-thumb">PDF</div>
+          <div style="flex:1; min-width:0;">
+            <div class="upload-name" id="upload-name">resume.pdf</div>
+            <div class="upload-status">
+              <span class="spinner"></span>
+              <span id="upload-stage">Parsing…</span>
+            </div>
+          </div>
+        </div>
+        <div class="progress">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="state-error" class="hidden">
+      <div class="error">
+        <div class="error-icon">!</div>
+        <div style="flex:1;">
+          <div class="error-title" id="error-title">Couldn't read this PDF</div>
+          <div class="error-msg" id="error-msg">Try a different file.</div>
+          <div class="error-actions">
+            <button class="btn btn-secondary btn-sm" id="error-retry">Try another file</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="state-result" class="result hidden"></div>
+  </div>
+
+  <script>
+    // ─── Elements ─────────────────────────────────────────
+    const $ = (id) => document.getElementById(id);
+    const dropzone = $("dropzone");
+    const fileInput = $("file-input");
+    const chooseBtn = $("choose-btn");
+    const stateIdle = $("state-idle");
+    const stateUploading = $("state-uploading");
+    const stateError = $("state-error");
+    const stateResult = $("state-result");
+    const topbar = $("topbar");
+    const header = $("header");
+    let lastResult = null;
+
+
+    // ─── Helpers ──────────────────────────────────────────
+    const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    function formatDate(s) {
+      if (!s) return "Present";
+      // Accept "YYYY-MM" or "YYYY-MM-DD" or "YYYY"
+      const m = String(s).match(/^(\d{4})(?:-(\d{1,2}))?/);
+      if (!m) return s;
+      const year = m[1];
+      const mo = m[2] ? parseInt(m[2], 10) : null;
+      if (mo && mo >= 1 && mo <= 12) return `${MONTHS[mo - 1]} ${year}`;
+      return year;
+    }
+    function dateRange(start, end) {
+      const s = formatDate(start);
+      const e = formatDate(end); // null → "Present"
+      if (!s && !e) return "";
+      if (!s) return e;
+      return `${s} — ${e}`;
+    }
+    function escapeHtml(s) {
+      if (s == null) return "";
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[c]));
+    }
+    function show(...nodes) {
+      [stateIdle, stateUploading, stateError, stateResult].forEach((n) => n.classList.add("hidden"));
+      nodes.forEach((n) => n.classList.remove("hidden"));
+    }
+
+    // ─── State transitions ────────────────────────────────
+    function showIdle() {
+      show(stateIdle);
+      topbar.classList.remove("is-visible");
+      header.style.display = "";
+      fileInput.value = "";
+    }
+    function showUploading(file) {
+      $("upload-name").textContent = file.name;
+      $("upload-stage").textContent = "Reading PDF…";
+      $("progress-fill").style.width = "0%";
+      $("progress-fill").classList.remove("indeterminate");
+      show(stateUploading);
+      topbar.classList.remove("is-visible");
+      header.style.display = "";
+    }
+    function showError(title, msg) {
+      $("error-title").textContent = title;
+      $("error-msg").textContent = msg;
+      show(stateError);
+      topbar.classList.remove("is-visible");
+      header.style.display = "";
+    }
+    function showResult(data, fileName) {
+      stateResult.innerHTML = renderResult(data);
+      show(stateResult);
+      $("topbar-name").textContent = fileName;
+      $("topbar-sub").textContent = "Parsed successfully";
+      topbar.classList.add("is-visible");
+      header.style.display = "none";
+      lastResult = { data, fileName };
+    }
+
+    // ─── Render ───────────────────────────────────────────
+    function renderResult(d) {
+      const has = (v) => v != null && String(v).trim() !== "";
+      const cards = [];
+
+      // Identity
+      const contacts = [];
+      if (has(d.email))    contacts.push(contactCell("email", "Email", d.email));
+      if (has(d.phone))    contacts.push(contactCell("phone", "Phone", d.phone));
+      if (has(d.location)) contacts.push(contactCell("pin", "Location", d.location));
+
+      let identity = `
+        <section class="card identity fade-up fade-up-1">
+          <h3 class="card-title">Personal info</h3>
+          <h2 class="name">${escapeHtml(d.name || "Unknown")}</h2>
+          ${contacts.length ? `<div class="contact-grid">${contacts.join("")}</div>` : ""}
+        </section>
+      `;
+      cards.push(identity);
+
+      if (has(d.summary)) {
+        cards.push(`
+          <section class="card summary fade-up fade-up-2">
+            <h3 class="card-title">Summary</h3>
+            <p>${escapeHtml(d.summary)}</p>
+          </section>
+        `);
+      }
+
+      if (Array.isArray(d.work_experience) && d.work_experience.length > 0) {
+        const items = d.work_experience.map((j) => `
+          <div class="tl-item">
+            <div class="tl-head">
+              <span class="tl-role">${escapeHtml(j.role || "")}</span>
+              <span class="tl-co">${escapeHtml(j.company ? "· " + j.company : "")}</span>
+              <span class="tl-dates">${escapeHtml(dateRange(j.start_date, j.end_date))}</span>
+            </div>
+            ${has(j.description) ? `<p class="tl-desc">${escapeHtml(j.description)}</p>` : ""}
+          </div>
+        `).join("");
+        cards.push(`
+          <section class="card fade-up fade-up-3">
+            <h3 class="card-title">Work experience</h3>
+            <div class="timeline">${items}</div>
+          </section>
+        `);
+      }
+
+      if (Array.isArray(d.education) && d.education.length > 0) {
+        const rows = d.education.map((e) => {
+          const degree = [e.degree, e.field_of_study].filter(has).join(" · ");
+          return `
+            <div class="edu-row">
+              <div>
+                <div class="edu-school">${escapeHtml(e.institution || "")}</div>
+                ${degree ? `<div class="edu-degree">${escapeHtml(degree)}</div>` : ""}
+              </div>
+              <div class="edu-dates">${escapeHtml(dateRange(e.start_date, e.end_date))}</div>
+            </div>
+          `;
+        }).join("");
+        cards.push(`
+          <section class="card fade-up fade-up-4">
+            <h3 class="card-title">Education</h3>
+            <div class="edu-list">${rows}</div>
+          </section>
+        `);
+      }
+
+      if (Array.isArray(d.skills) && d.skills.length > 0) {
+        const chips = d.skills.map((s) => `<span class="chip">${escapeHtml(s)}</span>`).join("");
+        cards.push(`
+          <section class="card fade-up fade-up-5">
+            <h3 class="card-title">Skills</h3>
+            <div class="chips">${chips}</div>
+          </section>
+        `);
+      }
+
+      return cards.join("");
+    }
+
+    function contactCell(kind, label, value) {
+      const icons = {
+        email: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+        phone: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+        pin: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+      };
+      return `
+        <div class="contact-row">
+          <span class="contact-icon">${icons[kind] || ""}</span>
+          <div class="contact-text">
+            <div class="contact-label">${escapeHtml(label)}</div>
+            <div class="contact-value">${escapeHtml(value)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ─── Submit logic ─────────────────────────────────────
+    async function submitFile(file) {
+      if (!file) return;
+      if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") {
+        showError("That doesn't look like a PDF", "Please upload a file ending in .pdf.");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showError("File too large", "Please upload a PDF under 10 MB.");
+        return;
+      }
+
+      showUploading(file);
+
+      // Stage labels
+      const stages = [
+        { at: 0,    label: "Reading PDF…",  pct: 18 },
+        { at: 500,  label: "Extracting text…", pct: 42 },
+        { at: 1100, label: "Parsing fields…",  pct: 72 },
+        { at: 1900, label: "Almost done…",     pct: 92 },
+      ];
+      const timers = stages.map((s) => setTimeout(() => {
+        $("upload-stage").textContent = s.label;
+        $("progress-fill").style.width = s.pct + "%";
+      }, s.at));
+
+      const fd = new FormData();
+      fd.append("file", file);
+
+      let data = null;
+      let errorTitle = null;
+      let errorDetail = null;
+      try {
+        const res = await fetch("/parse", { method: "POST", body: fd });
+        if (!res.ok) {
+          let detail = "HTTP " + res.status;
+          try {
+            const body = await res.json();
+            if (body && body.detail) detail = body.detail;
+          } catch (_) { /* response was not JSON */ }
+          errorTitle = "Parse failed (" + res.status + ")";
+          errorDetail = detail;
+        } else {
+          try {
+            data = await res.json();
+          } catch (e) {
+            errorTitle = "Bad response";
+            errorDetail = "Server returned a non-JSON response.";
+          }
+        }
+      } catch (err) {
+        errorTitle = "Network error";
+        errorDetail = err && err.message ? err.message : "Could not reach the server.";
+      }
+
+      // Ensure we show "complete" briefly before the result lands
+      const minDuration = 2200;
+      const start = performance.now();
+      const elapsed = performance.now() - start;
+      const wait = Math.max(0, minDuration - elapsed);
+
+      setTimeout(() => {
+        timers.forEach(clearTimeout);
+        $("progress-fill").style.width = "100%";
+        $("upload-stage").textContent = "Done";
+
+        setTimeout(() => {
+          if (errorTitle) {
+            showError(errorTitle, errorDetail);
+            return;
+          }
+          if (!data || typeof data !== "object") {
+            showError("Couldn't read this PDF", "Try a different file — the parser couldn't extract data from this one.");
+            return;
+          }
+          showResult(data, file.name);
+        }, 240);
+      }, wait);
+    }
+
+    // ─── Wire up events ───────────────────────────────────
+    chooseBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+    dropzone.addEventListener("click", (e) => {
+      // Avoid double-trigger when clicking the inner button
+      if (e.target.closest("button")) return;
+      fileInput.click();
+    });
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) submitFile(file);
+    });
+
+    // Drag and drop
+    let dragDepth = 0;
+    window.addEventListener("dragenter", (e) => {
+      if (!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes("Files")) return;
+      e.preventDefault();
+      dragDepth++;
+      dropzone.classList.add("is-drag");
+    });
+    window.addEventListener("dragover", (e) => {
+      if (!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes("Files")) return;
+      e.preventDefault();
+    });
+    window.addEventListener("dragleave", (e) => {
+      dragDepth = Math.max(0, dragDepth - 1);
+      if (dragDepth === 0) dropzone.classList.remove("is-drag");
+    });
+    window.addEventListener("drop", (e) => {
+      if (!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+      e.preventDefault();
+      dragDepth = 0;
+      dropzone.classList.remove("is-drag");
+      // Only accept drops when we're in the idle state
+      if (stateIdle.classList.contains("hidden")) return;
+      const file = e.dataTransfer.files[0];
+      submitFile(file);
+    });
+
+    $("parse-another").addEventListener("click", showIdle);
+    $("error-retry").addEventListener("click", showIdle);
+    $("download-json").addEventListener("click", () => {
+      if (!lastResult) return;
+      const text = JSON.stringify(lastResult.data, null, 2);
+      const blob = new Blob([text], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = lastResult.fileName.replace(/\.pdf$/i, "") + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Initial state
+    showIdle();
+  </script>
+
+
+</body></html>
