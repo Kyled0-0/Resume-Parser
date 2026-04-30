@@ -4,6 +4,7 @@ import google.generativeai as genai
 import pydantic
 import pypdf.errors
 from fastapi import Depends, FastAPI, HTTPException, UploadFile
+from fastapi.staticfiles import StaticFiles
 from google.api_core.exceptions import GoogleAPICallError
 from pythonjsonlogger import jsonlogger
 
@@ -82,3 +83,6 @@ async def parse(
     except Exception as e:
         logger.exception("parse_unexpected_error", extra={"error_type": type(e).__name__})
         raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
