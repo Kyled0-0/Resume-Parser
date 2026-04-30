@@ -2,12 +2,11 @@ import logging
 
 import anthropic
 from fastapi import Depends, FastAPI, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
 
+from app.config import settings
 from app.dependencies import get_anthropic_client
 from app.parser import parse_resume
 from app.schemas import ErrorResponse, HealthResponse, ParsedResume
-from app.config import settings
 
 logger = logging.getLogger(__name__)
 
