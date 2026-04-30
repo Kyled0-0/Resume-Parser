@@ -1,7 +1,6 @@
 import logging
 
 import anthropic
-import anthropic.errors
 import pydantic
 import pypdf.errors
 from fastapi import Depends, FastAPI, HTTPException, UploadFile
