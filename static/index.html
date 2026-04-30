@@ -2,17 +2,441 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Resume Parser</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 4rem auto; padding: 0 1rem; color: #333; }
-    h1 { font-size: 1.5rem; }
-    p { line-height: 1.5; }
-    code { background: #f4f4f4; padding: 0.1rem 0.3rem; border-radius: 4px; }
+    :root {
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --error-text: #991b1b;
+      --chip: #eff6ff;
+      --chip-text: #1e40af;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 48px 24px; }
+    header { text-align: center; margin-bottom: 32px; }
+    header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 600; }
+    header p { margin: 0; color: var(--muted); font-size: 15px; }
+
+    .drop-zone {
+      background: var(--card);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 56px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent);
+      background: #eff6ff;
+    }
+    .drop-zone .icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+    .drop-zone .primary {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .drop-zone .secondary {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .drop-zone input { display: none; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      text-decoration: none;
+      font-family: inherit;
+    }
+    .button-primary { background: var(--accent); color: white; }
+    .button-primary:hover { background: var(--accent-hover); }
+    .button-secondary { background: var(--card); color: var(--text); border-color: var(--border); }
+    .button-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .toolbar .actions { display: flex; gap: 8px; }
+
+    .status {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .status .filename { color: var(--text); font-weight: 500; }
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .error strong { display: block; margin-bottom: 4px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px 24px;
+    }
+    .contact-item .label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .contact-item .value { font-size: 15px; word-break: break-word; }
+    .name { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+
+    .entry {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .entry:last-child { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+      margin-bottom: 4px;
+    }
+    .entry-title { font-size: 15px; font-weight: 600; }
+    .entry-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+    .entry-dates { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .entry-description { font-size: 14px; color: #334155; margin-top: 6px; white-space: pre-wrap; }
+
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .skill {
+      background: var(--chip);
+      color: var(--chip-text);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 24px 16px; }
+      .toolbar { flex-direction: column; gap: 12px; align-items: stretch; }
+      .toolbar .actions { justify-content: center; }
+    }
   </style>
 </head>
 <body>
-  <h1>Resume Parser</h1>
-  <p>Frontend placeholder. Replace this file at <code>static/index.html</code> with your generated UI.</p>
-  <p>Backend endpoint: <code>POST /parse</code> with a PDF file as multipart form data.</p>
+  <div class="container">
+    <header>
+      <h1>Resume Parser</h1>
+      <p>Drop a PDF resume and get the data extracted instantly.</p>
+    </header>
+
+    <div id="upload-view">
+      <label class="drop-zone" id="drop-zone">
+        <div class="icon">↑</div>
+        <div class="primary">Choose a PDF or drop it here</div>
+        <div class="secondary">Up to 10 MB</div>
+        <input type="file" id="file-input" accept="application/pdf">
+      </label>
+    </div>
+
+    <div id="status-view" hidden>
+      <div class="status">
+        <span class="spinner"></span>
+        Parsing <span class="filename" id="status-filename"></span>...
+      </div>
+    </div>
+
+    <div id="result-view" hidden>
+      <div class="toolbar">
+        <button class="button button-secondary" id="reset-btn">← Parse another</button>
+        <div class="actions">
+          <button class="button button-primary" id="download-btn">Download JSON</button>
+        </div>
+      </div>
+      <div id="error-banner" hidden></div>
+      <div id="result-content"></div>
+    </div>
+  </div>
+
+  <script>
+    const uploadView = document.getElementById('upload-view');
+    const statusView = document.getElementById('status-view');
+    const resultView = document.getElementById('result-view');
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const statusFilename = document.getElementById('status-filename');
+    const errorBanner = document.getElementById('error-banner');
+    const resultContent = document.getElementById('result-content');
+    const downloadBtn = document.getElementById('download-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    let lastResult = null;
+    let lastFilename = '';
+
+    function showView(view) {
+      uploadView.hidden = view !== 'upload';
+      statusView.hidden = view !== 'status';
+      resultView.hidden = view !== 'result';
+    }
+
+    function reset() {
+      fileInput.value = '';
+      lastResult = null;
+      lastFilename = '';
+      errorBanner.hidden = true;
+      errorBanner.innerHTML = '';
+      resultContent.innerHTML = '';
+      showView('upload');
+    }
+
+    function showError(title, message) {
+      errorBanner.innerHTML = `<strong>${escapeHtml(title)}</strong>${escapeHtml(message)}`;
+      errorBanner.className = 'error';
+      errorBanner.hidden = false;
+      resultContent.innerHTML = '';
+      showView('result');
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return null;
+      const m = /^(\d{4})-(\d{2})$/.exec(iso);
+      if (!m) return iso;
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${months[parseInt(m[2], 10) - 1]} ${m[1]}`;
+    }
+
+    function dateRange(start, end) {
+      const s = formatDate(start);
+      const e = end ? formatDate(end) : 'Present';
+      if (!s && !end) return '';
+      if (!s) return e;
+      return `${s} – ${e}`;
+    }
+
+    function renderResult(data) {
+      const parts = [];
+
+      // Contact card
+      const contactItems = [];
+      if (data.email) contactItems.push(`<div class="contact-item"><div class="label">Email</div><div class="value">${escapeHtml(data.email)}</div></div>`);
+      if (data.phone) contactItems.push(`<div class="contact-item"><div class="label">Phone</div><div class="value">${escapeHtml(data.phone)}</div></div>`);
+      if (data.location) contactItems.push(`<div class="contact-item"><div class="label">Location</div><div class="value">${escapeHtml(data.location)}</div></div>`);
+
+      if (data.name || contactItems.length) {
+        parts.push(`
+          <div class="card">
+            ${data.name ? `<div class="name">${escapeHtml(data.name)}</div>` : ''}
+            ${contactItems.length ? `<div class="contact-grid">${contactItems.join('')}</div>` : ''}
+          </div>
+        `);
+      }
+
+      // Summary
+      if (data.summary) {
+        parts.push(`<div class="card"><h2>Summary</h2><div>${escapeHtml(data.summary)}</div></div>`);
+      }
+
+      // Work experience
+      if (data.work_experience && data.work_experience.length) {
+        const entries = data.work_experience.map(w => `
+          <div class="entry">
+            <div class="entry-header">
+              <span class="entry-title">${escapeHtml(w.role || 'Role')}</span>
+              <span class="entry-dates">${escapeHtml(dateRange(w.start_date, w.end_date))}</span>
+            </div>
+            ${w.company ? `<div class="entry-subtitle">${escapeHtml(w.company)}</div>` : ''}
+            ${w.description ? `<div class="entry-description">${escapeHtml(w.description)}</div>` : ''}
+          </div>
+        `).join('');
+        parts.push(`<div class="card"><h2>Work Experience</h2>${entries}</div>`);
+      }
+
+      // Education
+      if (data.education && data.education.length) {
+        const entries = data.education.map(ed => {
+          const title = ed.degree && ed.field_of_study
+            ? `${ed.degree}, ${ed.field_of_study}`
+            : (ed.degree || ed.field_of_study || ed.institution || 'Education');
+          return `
+            <div class="entry">
+              <div class="entry-header">
+                <span class="entry-title">${escapeHtml(title)}</span>
+                <span class="entry-dates">${escapeHtml(dateRange(ed.start_date, ed.end_date))}</span>
+              </div>
+              ${ed.institution ? `<div class="entry-subtitle">${escapeHtml(ed.institution)}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+        parts.push(`<div class="card"><h2>Education</h2>${entries}</div>`);
+      }
+
+      // Skills
+      if (data.skills && data.skills.length) {
+        const chips = data.skills.map(s => `<span class="skill">${escapeHtml(s)}</span>`).join('');
+        parts.push(`<div class="card"><h2>Skills</h2><div class="skills">${chips}</div></div>`);
+      }
+
+      if (parts.length === 0) {
+        parts.push(`<div class="card"><h2>No data extracted</h2><div>The PDF was processed but no structured fields were recognised.</div></div>`);
+      }
+
+      resultContent.innerHTML = parts.join('');
+      errorBanner.hidden = true;
+      showView('result');
+    }
+
+    async function uploadAndParse(file) {
+      if (!file) return;
+      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+        showError('Unsupported file', 'Please upload a PDF file.');
+        return;
+      }
+
+      lastFilename = file.name;
+      statusFilename.textContent = file.name;
+      showView('status');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/parse', { method: 'POST', body: formData });
+        if (!response.ok) {
+          let detail = `HTTP ${response.status}`;
+          try {
+            const body = await response.json();
+            if (body && body.detail) detail = body.detail;
+          } catch (_) { /* response was not JSON */ }
+          showError(`Parse failed (${response.status})`, detail);
+          return;
+        }
+        const data = await response.json();
+        lastResult = data;
+        renderResult(data);
+      } catch (err) {
+        showError('Network error', err.message || 'Could not reach the server.');
+      }
+    }
+
+    // Drag and drop
+    ['dragenter', 'dragover'].forEach(ev => {
+      dropZone.addEventListener(ev, e => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(ev => {
+      dropZone.addEventListener(ev, e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      });
+    });
+    dropZone.addEventListener('drop', e => {
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) uploadAndParse(file);
+    });
+
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (file) uploadAndParse(file);
+    });
+
+    resetBtn.addEventListener('click', reset);
+
+    downloadBtn.addEventListener('click', () => {
+      if (!lastResult) return;
+      const json = JSON.stringify(lastResult, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const baseName = lastFilename.replace(/\.pdf$/i, '') || 'resume';
+      a.href = url;
+      a.download = `${baseName}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  </script>
 </body>
 </html>
