@@ -70,17 +70,21 @@ Console → **APIs & Services → Library**. Enable:
 
 ## 5. Push this repo to GitHub
 
-If you haven't already:
+✅ **Already done** — repo lives at [`github.com/Kyled0-0/Resume-Parser`](https://github.com/Kyled0-0/Resume-Parser) with `main` as the default branch.
 
+For future updates, normal git flow:
 ```bash
-# In the repo root (not in a worktree)
-gh repo create resume-parser --public --source=. --push
-# Or use the GitHub UI to create the repo, then:
-git remote add origin https://github.com/<you>/resume-parser.git
-git push -u origin main
+git add -A
+git commit -m "..."
+git push origin main
 ```
 
 The `.gitignore` already excludes `CLAUDE.md`, `docs/`, `.env`, `.venv/`, `.worktrees/` — secrets and operational files won't go to GitHub.
+
+> **One-time GitHub setting:** Settings → Branches → set **`main`** as the default branch (was `master`). Then delete the old `master` branch to avoid confusion:
+> ```bash
+> git push origin --delete master
+> ```
 
 ---
 
